@@ -11,21 +11,42 @@ const vec3 camera_right = iCamera[0].xyz;
 const vec3 camera_up = iCamera[1].xyz;
 
 const int MAX_MARCHING_STEPS = 5;
-const float EPSILON = 0.01f;
+const float EPSILON = 0.00001f;
 const float END = 1000.f;
 
 
 
 #define DEBUG 0
 
+float sdBox(vec3 p, vec3 b)
+{
+	vec3 d = abs(p) - b;
+	return length(max(d, 0.0))
+			+ min(max(d.x,max(d.y,d.z)),0.0);
+}
+
 float sdSphere(vec3 p, float s)
 {
-	return length(p) - s;
+	vec3 q = p;
+	//q.x = mod(q.x, s*3.0);
+	//q.y = mod(q.y, s*3.0);
+	//q.z = mod(q.z, s*3.0);
+	return length(q - vec3(0.5, 0.0, -2.0)) - s;
+}
+
+float sdIntersect(float dA, float dB) {
+	return max(dA, dB);
 }
 
 float sdScene(vec3 p) {
 	//return mod(sdSphere(p - vec3(0.0, 0.0, -2.0), 0.2), 4.0);
-	return sdSphere(p - vec3(0.0, 0.0, -2.0), 0.2);
+	vec3 b = vec3(0.1, 0.1, 0.1);
+	//return min(sdSphere(p - vec3(0.0, 0.0, -2.0), 0.2), sdBox(p, b));
+	float dSphere = sdSphere(p, 1.0);
+	float dBox = sdBox(p, b);
+	//return sdIntersect(dSphere, dBox);
+	//return dBox;
+	return dSphere;
 }
 
 vec3 estSurfNormal(vec3 p) {
